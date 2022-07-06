@@ -7,4 +7,6 @@ public interface CustomerService {
    Customer saveCustomer(Customer customer, List<Long> petIds) throws RuntimeException;
    List<Customer> getAllCustomers();
    Customer getOwnerByPet(long petId);
+
+    Customer getOne(long ownerId);
 }

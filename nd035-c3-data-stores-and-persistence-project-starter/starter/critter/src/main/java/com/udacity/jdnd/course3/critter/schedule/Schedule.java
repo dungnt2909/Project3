@@ -2,6 +2,7 @@ package com.udacity.jdnd.course3.critter.schedule;
 
 
 import com.udacity.jdnd.course3.critter.pet.Pet;
+import com.udacity.jdnd.course3.critter.user.Customer;
 import com.udacity.jdnd.course3.critter.user.Employee;
 import com.udacity.jdnd.course3.critter.user.EmployeeSkill;
 
@@ -21,6 +22,9 @@ public class Schedule {
 
     @ManyToMany(targetEntity = Pet.class)
     List<Pet> pets;
+
+    @ManyToMany(targetEntity = Customer.class)
+    List<Customer> customers;
     private LocalDate date;
 
     @ElementCollection
@@ -72,5 +76,13 @@ public class Schedule {
 
     public void setActivities(Set<EmployeeSkill> activities) {
         this.activities = activities;
+    }
+
+    public List<Customer> getCustomers() {
+        return customers;
+    }
+
+    public void setCustomers(List<Customer> customers) {
+        this.customers = customers;
     }
 }

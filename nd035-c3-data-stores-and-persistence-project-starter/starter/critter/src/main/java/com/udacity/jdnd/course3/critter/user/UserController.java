@@ -1,6 +1,7 @@
 package com.udacity.jdnd.course3.critter.user;
 
 import com.udacity.jdnd.course3.critter.pet.Pet;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -58,7 +59,7 @@ public class UserController {
         try {
             convertedCustomer = convertCustomerToCustomerDTO(customerService.getOwnerByPet(petId));
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer for pet with petId= "+petId+" could not be found", e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer for pet["+petId+"] could not be found", e);
         }
         return convertedCustomer;
     }
@@ -70,7 +71,7 @@ public class UserController {
         try {
             convertedEmployee = convertEmployeeToEmployeeDTO(employeeService.saveEmployee(employee));
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Employee could not be saved", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Employee could not be saved", e);
         }
         return convertedEmployee;
     }
@@ -81,7 +82,7 @@ public class UserController {
         try {
             employeeDTO= convertEmployeeToEmployeeDTO(employeeService.getEmployee(employeeId));
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Employee with id: " + employeeId + " not found", e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee[" + employeeId + "] not found", e);
         }
         return employeeDTO;
     }
@@ -91,7 +92,7 @@ public class UserController {
         try {
             employeeService.setAvailability(daysAvailable, employeeId);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Employee with id: " + employeeId + " not found", e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee[" + employeeId + "] not found", e);
         }
     }
 
@@ -100,12 +101,27 @@ public class UserController {
         List<Employee> qualifiedEmployees = employeeService.findEmployeesForService(employeeDTO.getDate(), employeeDTO.getSkills());
         return qualifiedEmployees.stream().map(this::convertEmployeeToEmployeeDTO).collect(Collectors.toList());
     }
-    private EmployeeDTO convertEmployeeToEmployeeDTO(Employee employee) {
-        return new EmployeeDTO(employee.getId(), employee.getName(), employee.getSkills(), employee.getDaysAvailable());
+
+
+    private CustomerDTO convertCustomerToCustomerDTO(Customer customer){
+        CustomerDTO dto = new CustomerDTO();
+        BeanUtils.copyProperties(customer,dto);
+        List<Pet> pets = customer.getPets();
+        if(pets != null){
+            List<Long> ids = new ArrayList<>();
+            for(Pet pet: pets){
+                ids.add(pet.getId());
+            }
+            dto.setPetIds(ids);
+        }
+
+        return dto;
     }
 
-    private CustomerDTO convertCustomerToCustomerDTO(Customer customer) {
-        List<Long> petIds = customer.getPets().stream().map(Pet::getId).collect(Collectors.toList());
-        return new CustomerDTO(customer.getId(), customer.getName(), customer.getPhoneNumber(), customer.getNotes(), petIds);
+    private EmployeeDTO convertEmployeeToEmployeeDTO(Employee employee){
+        EmployeeDTO dto = new EmployeeDTO();
+        BeanUtils.copyProperties(employee,dto);
+        return dto;
     }
+
 }

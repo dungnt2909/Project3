@@ -1,5 +1,6 @@
 package com.udacity.jdnd.course3.critter.pet;
 
+import com.udacity.jdnd.course3.critter.user.CustomerService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,21 +21,22 @@ public class PetController {
     @Autowired
     PetService petService;
 
+    @Autowired
+    CustomerService customerService;
+
     @PostMapping
     public PetDTO savePet(@RequestBody PetDTO petDTO) {
         Pet pet = new Pet(petDTO.getType(), petDTO.getName(), petDTO.getBirthDate(), petDTO.getNotes());
         return convertPetToPetDTO(petService.savePet(pet, petDTO.getOwnerId()));
     }
 
-    private PetDTO convertPetToPetDTO(Pet pet) {
-        return new PetDTO(pet.getId(), pet.getPetType(), pet.getName(), pet.getCustomer().getId(), pet.getBirthDate() ,pet.getNotes());
-    }
 
-//    private PetDTO convertPetToPetDTO(Pet pet){
-//        PetDTO petDTO = new PetDTO();
-//        BeanUtils.copyProperties(pet, petDTO);
-//        return petDTO;
-//    }
+    private PetDTO convertPetToPetDTO(Pet pet){
+        PetDTO petDTO = new PetDTO();
+        BeanUtils.copyProperties(pet,petDTO);
+        petDTO.setOwnerId(pet.getCustomer().getId());
+        return petDTO;
+    }
 
     @GetMapping("/{petId}")
     public PetDTO getPet(@PathVariable long petId) {
@@ -57,7 +59,7 @@ public class PetController {
         try {
             pets = petService.getByOwnerId(ownerId);
         } catch (Exception exception) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Owner pet with id " + ownerId + " not found", exception);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Owner with id " + ownerId + " not found", exception);
         }
         return pets.stream().map(this::convertPetToPetDTO).collect(Collectors.toList());    }
 }

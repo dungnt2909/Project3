@@ -25,7 +25,7 @@ public class CustomerServiceImpl implements CustomerService {
                 if (optionalPet.isPresent()) {
                     petList.add(optionalPet.get());
                 } else {
-                    throw new RuntimeException("one Pet not found for this customer");
+                    throw new RuntimeException("");
                 }
             }
         }
@@ -40,11 +40,13 @@ public class CustomerServiceImpl implements CustomerService {
     public Customer getOwnerByPet(long petId) {
         Optional<Pet> optionalPet= petRepo.findById(petId);
         if (!optionalPet.isPresent()) {
-            throw new RuntimeException("cannot find pet!");
+            throw new RuntimeException("pet not found");
         }
         return optionalPet.get().getCustomer();
     }
 
-
+    public Customer getOne(long id){
+        return this.customerRepo.getOne(id);
+    }
 
 }

@@ -2,6 +2,7 @@ package com.udacity.jdnd.course3.critter.schedule;
 
 import com.udacity.jdnd.course3.critter.pet.Pet;
 import com.udacity.jdnd.course3.critter.user.Employee;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -44,7 +45,7 @@ public class ScheduleController {
         try {
             schedules = scheduleService.getPetSchedule(petId);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Pet schedule with id: " + petId + " not found", e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Pet schedule for pet[" + petId + "] not found", e);
         }
         List<ScheduleDTO> scheduleDTOList = new ArrayList<>();
         for (Schedule s: schedules) {
@@ -59,7 +60,7 @@ public class ScheduleController {
         try {
             schedules = scheduleService.getEmployeeSchedule(employeeId);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Employee schedule with employee id: " + employeeId + " not found", e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee schedule for employee[" + employeeId + "] not found", e);
         }
         List<ScheduleDTO> scheduleDTOList = new ArrayList<>();
         for (Schedule s: schedules) {
@@ -74,7 +75,7 @@ public class ScheduleController {
         try {
             schedules = scheduleService.getCustomerSchedule(customerId);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer schedule with customer id: " + customerId + " not found", e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer schedule for customer[" + customerId + "] not found", e);
         }
         List<ScheduleDTO> scheduleDTOList = new ArrayList<>();
         for (Schedule s: schedules) {
@@ -82,16 +83,18 @@ public class ScheduleController {
         }
         return scheduleDTOList;    }
 
+    private ScheduleDTO convertScheduleToScheduleDTO(Schedule schedule){
+        ScheduleDTO scheduleDTO = new ScheduleDTO();
+        BeanUtils.copyProperties(schedule,scheduleDTO);
 
-    private ScheduleDTO convertScheduleToScheduleDTO(Schedule schedule) {
-        List<Long> employeeIds = schedule.getEmployees().stream().map(Employee::getId).collect(Collectors.toList());
-        List<Long> petIds = schedule.getPets().stream().map(Pet::getId).collect(Collectors.toList());
+        scheduleDTO.setEmployeeIds(schedule.getEmployees()
+                .stream().map(e -> e.getId())
+                .collect(Collectors.toList()));
 
-        ScheduleDTO scheduleDTO= new ScheduleDTO();
-        scheduleDTO.setActivities(schedule.getActivities());
-        scheduleDTO.setDate(schedule.getDate());
-        scheduleDTO.setEmployeeIds(employeeIds);
-        scheduleDTO.setPetIds(petIds);
+        scheduleDTO.setPetIds(schedule.getPets()
+                .stream().map(p -> p.getId())
+                .collect(Collectors.toList()));
+
         return scheduleDTO;
     }
 }
