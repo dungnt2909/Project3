@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface CustomerService {
 
-   CustomerDTO createCustomer(CustomerDTO customerDTO);
-
-   List<CustomerDTO> findAll();
+   Customer saveCustomer(Customer customer, List<Long> petIds) throws RuntimeException;
+   List<Customer> getAllCustomers();
+   Customer getOwnerByPet(long petId);
 }

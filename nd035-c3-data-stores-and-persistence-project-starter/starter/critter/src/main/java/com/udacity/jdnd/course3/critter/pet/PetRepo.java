@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@Repository
-public interface PetRepo extends JpaRepository<Pet,Long> {
 
-    @Query(value = "select p from Pet as p join Customer as c on c.id = p.customer.id where p.customer.id = :ownerId")
-    List<Pet> getByOwnerId(@RequestParam("ownerId") Long ownerId);
+@Repository
+public interface PetRepo extends JpaRepository<Pet, Long> {
+    List<Pet> findByCustomerId(Long customerId);
 }
+
  

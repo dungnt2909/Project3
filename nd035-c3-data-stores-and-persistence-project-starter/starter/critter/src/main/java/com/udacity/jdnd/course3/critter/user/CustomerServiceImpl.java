@@ -1,56 +1,48 @@
 package com.udacity.jdnd.course3.critter.user;
 
+import com.udacity.jdnd.course3.critter.pet.Pet;
 import com.udacity.jdnd.course3.critter.pet.PetRepo;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
-
+    @Autowired
+    PetRepo petRepo;
     @Autowired
     CustomerRepo customerRepo;
 
-    @Autowired
-    PetRepo petRepo;
 
-    @Autowired
-    ModelMapper mapper;
-
-    @Override
-    public CustomerDTO createCustomer(CustomerDTO customerDTO) {
-        Customer createdCustomer = new Customer();
-        createdCustomer.setId(customerDTO.getId());
-        createdCustomer.setName(customerDTO.getName());
-        createdCustomer.setPhoneNumber(customerDTO.getPhoneNumber());
-        return convertToDTO(customerRepo.save(createdCustomer));
-    }
-
-    @Override
-    public List<CustomerDTO> findAll() {
-        List<Customer> customerList = customerRepo.findAll();
-        List<CustomerDTO> customerDTOList = new ArrayList<>();
-        for(Customer c : customerList){
-            CustomerDTO cDTO = new CustomerDTO();
-            cDTO.setId(c.getId());
-            cDTO.setName(c.getName());
-            cDTO.setPhoneNumber(c.getPhoneNumber());
-            customerDTOList.add(cDTO);
+    public Customer saveCustomer(Customer customer, List<Long> petIds) throws RuntimeException{
+        List<Pet> petList = new ArrayList<>();
+        if (petIds!=null && !petIds.isEmpty()) {
+            for (Long id: petIds) {
+                Optional<Pet> optionalPet= petRepo.findById(id);
+                if (optionalPet.isPresent()) {
+                    petList.add(optionalPet.get());
+                } else {
+                    throw new RuntimeException("one Pet not found for this customer");
+                }
+            }
         }
-        return customerDTOList;
+        customer.setPets(petList);
+        return customerRepo.save(customer);
     }
 
-    public CustomerDTO convertToDTO(Customer customer){
-        return mapper.map(customer, CustomerDTO.class);
+    public List<Customer> getAllCustomers() {
+        return customerRepo.findAll();
     }
 
-    public Customer convertToEntity(CustomerDTO customerDTO){
-        return mapper.map(customerDTO, Customer.class);
+    public Customer getOwnerByPet(long petId) {
+        Optional<Pet> optionalPet= petRepo.findById(petId);
+        if (!optionalPet.isPresent()) {
+            throw new RuntimeException("cannot find pet!");
+        }
+        return optionalPet.get().getCustomer();
     }
 
 

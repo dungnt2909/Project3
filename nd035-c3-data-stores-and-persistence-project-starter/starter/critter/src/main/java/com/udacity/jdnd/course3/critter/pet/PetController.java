@@ -1,9 +1,14 @@
 package com.udacity.jdnd.course3.critter.pet;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Handles web requests related to Pets.
@@ -17,21 +22,42 @@ public class PetController {
 
     @PostMapping
     public PetDTO savePet(@RequestBody PetDTO petDTO) {
-        return petService.createPet(petDTO);
+        Pet pet = new Pet(petDTO.getType(), petDTO.getName(), petDTO.getBirthDate(), petDTO.getNotes());
+        return convertPetToPetDTO(petService.savePet(pet, petDTO.getOwnerId()));
     }
+
+    private PetDTO convertPetToPetDTO(Pet pet) {
+        return new PetDTO(pet.getId(), pet.getPetType(), pet.getName(), pet.getCustomer().getId(), pet.getBirthDate() ,pet.getNotes());
+    }
+
+//    private PetDTO convertPetToPetDTO(Pet pet){
+//        PetDTO petDTO = new PetDTO();
+//        BeanUtils.copyProperties(pet, petDTO);
+//        return petDTO;
+//    }
 
     @GetMapping("/{petId}")
     public PetDTO getPet(@PathVariable long petId) {
-        return petService.getById(petId);
+        return convertPetToPetDTO(petService.getById(petId));
     }
 
     @GetMapping
     public List<PetDTO> getPets(){
-        return petService.getAllPet();
+        List<PetDTO> petDTOList = new ArrayList<>();
+        List<Pet> pets = petService.getAllPet();
+        for (Pet p: pets) {
+            petDTOList.add(convertPetToPetDTO(p));
+        }
+        return petDTOList;
     }
 
     @GetMapping("/owner/{ownerId}")
     public List<PetDTO> getPetsByOwner(@PathVariable long ownerId) {
-        return petService.getByOwnerId(ownerId);
-    }
+        List<Pet> pets;
+        try {
+            pets = petService.getByOwnerId(ownerId);
+        } catch (Exception exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Owner pet with id " + ownerId + " not found", exception);
+        }
+        return pets.stream().map(this::convertPetToPetDTO).collect(Collectors.toList());    }
 }

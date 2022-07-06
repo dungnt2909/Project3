@@ -1,38 +1,53 @@
 package com.udacity.jdnd.course3.critter.user;
 
-import com.udacity.jdnd.course3.critter.schedule.Schedule;
-import lombok.Data;
-import lombok.Generated;
+import com.udacity.jdnd.course3.critter.user.EmployeeSkill;
+import org.hibernate.annotations.Nationalized;
 
-import javax.persistence.*;
-
-
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import java.time.DayOfWeek;
 import java.util.Set;
 
 @Entity
-@Data
 public class Employee {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Generated
-    private Long id;
+    @GeneratedValue
+    private long id;
 
-    @Column(name = "employee_name")
+    @Nationalized
     private String name;
-
     @ElementCollection
-    @Enumerated(EnumType.STRING)
     private Set<EmployeeSkill> skills;
-
     @ElementCollection
-    @Column(name = "days_available")
-    @Enumerated(EnumType.STRING)
     private Set<DayOfWeek> daysAvailable;
 
-//    @ManyToOne
-//    @JoinColumn(name = "schedule_id")
-//    private Schedule schedule;
+    public Employee() {
+    }
+
+    public Employee(long id, String name, Set<EmployeeSkill> skills, Set<DayOfWeek> daysAvailable) {
+        this.id = id;
+        this.name = name;
+        this.skills = skills;
+        this.daysAvailable = daysAvailable;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public Set<EmployeeSkill> getSkills() {
         return skills;
@@ -40,5 +55,13 @@ public class Employee {
 
     public void setSkills(Set<EmployeeSkill> skills) {
         this.skills = skills;
+    }
+
+    public Set<DayOfWeek> getDaysAvailable() {
+        return daysAvailable;
+    }
+
+    public void setDaysAvailable(Set<DayOfWeek> daysAvailable) {
+        this.daysAvailable = daysAvailable;
     }
 }

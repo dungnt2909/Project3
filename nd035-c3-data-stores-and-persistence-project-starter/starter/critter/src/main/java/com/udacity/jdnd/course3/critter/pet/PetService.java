@@ -5,11 +5,11 @@ import java.util.List;
 
 public interface PetService {
 
-    PetDTO createPet(PetDTO petDTO);
+    Pet savePet(Pet pet, long ownerId);
 
-    PetDTO getById(Long petId);
+    Pet getById(long petId);
 
-    List<PetDTO> getAllPet();
+    List<Pet> getAllPet();
 
-    List<PetDTO> getByOwnerId(Long ownerId);
+    List<Pet> getByOwnerId(long ownerId);
 }
